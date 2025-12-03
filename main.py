@@ -302,9 +302,25 @@ def collect_target_ratio() -> Dict[str, float]:
 
 
 def main() -> None:
-    st.title("성취평가 등급컷 예측 프로그램")
+    title_col, meta_col = st.columns([3, 1])
+    with title_col:
+        st.title("성취평가 등급컷 예측 프로그램")
+    with meta_col:
+        st.markdown("<div style='text-align:right;'>Created by 윤진석</div>", unsafe_allow_html=True)
+
     st.caption(
-        "기말고사 성적 분포를 가정(중간고사와 동일)하여 원하는 학기말 성취평가 비율을 시뮬레이션합니다. / Created by 윤진석"
+        "기말고사 성적 분포를 가정(중간고사와 동일)하여 원하는 학기말 성취평가 비율을 시뮬레이션합니다."
+    )
+    st.markdown(
+        """
+* **중간고사 성적 파일 다운로드 방법**  
+  나이스 → 교과담임 → 지필평가조회/통계 → 지필평가 조회 → 교과목별일람표조회-전체학급  
+  → 고사, 학년, 과목 선택 → 조회 → 다운로드버튼(디스켓모양) → XLS data
+
+* **수행평가 성적 파일 다운로드 방법**  
+  나이스 → 교과담임 → 수행평가조회/통계 → 수행평가 조회 → 교과목별일람표조회-전체학급  
+  → 학년, 과목, 영역 선택 → 조회 → 다운로드버튼(디스켓모양) → XLS data
+        """
     )
 
     with st.sidebar:
