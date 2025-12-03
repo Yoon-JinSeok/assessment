@@ -68,6 +68,41 @@ def make_student_key(class_label, student_no) -> str:
     return student_id
 
 
+def collect_student_meta(*grade_frames: pd.DataFrame) -> Dict[str, Dict[str, object]]:
+    """각 평가 데이터프레임에서 학생 별 반/번호 정보를 모은다."""
+
+    meta: Dict[str, Dict[str, object]] = {}
+    for frame in grade_frames:
+        if frame is None or frame.empty:
+            continue
+        for _, row in frame.iterrows():
+            key = row.get("student_key")
+            if not key:
+                continue
+            entry = meta.setdefault(key, {"class_label": None, "student_no": None})
+            class_val = row.get("class_label")
+            if entry["class_label"] in (None, "") and class_val not in (None, ""):
+                entry["class_label"] = class_val
+            number_val = row.get("student_no")
+            if entry["student_no"] in (None, "") and number_val not in (None, ""):
+                entry["student_no"] = number_val
+    return meta
+
+
+def format_student_display(class_label, student_no, fallback: str = "") -> str:
+    """반-번호 형식 문자열 생성."""
+
+    class_part = normalize_identifier(class_label)
+    student_part = normalize_identifier(student_no)
+    if class_part and student_part:
+        return f"{class_part}-{student_part}"
+    if class_part:
+        return class_part
+    if student_part:
+        return student_part
+    return fallback or "-"
+
+
 @st.cache_data(show_spinner=False)
 def parse_gradebook(
     file_bytes: bytes,
@@ -335,6 +370,12 @@ def main() -> None:
     student_records["performance"] = student_records["student_key"].map(performance_series)
     student_records["final_exam"] = student_records["midterm"]  # 기말고사 = 중간고사 가정
 
+    student_meta = collect_student_meta(midterm_df, performance_df)
+    class_map = {key: info.get("class_label") for key, info in student_meta.items()}
+    number_map = {key: info.get("student_no") for key, info in student_meta.items()}
+    student_records["class_label"] = student_records["student_key"].map(class_map)
+    student_records["student_no"] = student_records["student_key"].map(number_map)
+
     student_records = apply_weights(
         student_records,
         {
@@ -348,6 +389,15 @@ def main() -> None:
             "final_exam": final_exam_weight,
         },
     )
+
+    student_records["student_display"] = [
+        format_student_display(cls, num, fallback=key)
+        for cls, num, key in zip(
+            student_records["class_label"],
+            student_records["student_no"],
+            student_records["student_key"],
+        )
+    ]
 
     st.header("기말고사 등급컷 시뮬레이션")
     st.write("기본값은 중간고사 등급컷을 따릅니다. 각 슬라이더를 드래그하면 즉시 재계산됩니다.")
@@ -396,21 +446,23 @@ def main() -> None:
     )
     st.altair_chart(bar_chart, use_container_width=True)
 
-    st.subheader("학생별 가중 총점 미리보기")
-    st.dataframe(
-        student_records.sort_values("total", ascending=False)
-        .head(15)
+    st.subheader("학생별 가중 총점")
+    student_table = (
+        student_records.copy()
         .assign(등급=lambda df_: df_["total"].apply(lambda v: assign_grade(v, final_total_cuts)))
-        [["student_key", "midterm", "performance", "final_exam", "total", "등급"]]
         .rename(
             columns={
-                "student_key": "학생ID",
+                "student_display": "학생ID",
                 "midterm": "중간고사",
                 "performance": "수행평가",
                 "final_exam": "기말고사",
                 "total": "학기말총점",
             }
-        ),
+        )
+        .sort_values("학생ID")
+    )
+    st.dataframe(
+        student_table[["학생ID", "중간고사", "수행평가", "기말고사", "학기말총점", "등급"]],
         use_container_width=True,
     )
 
