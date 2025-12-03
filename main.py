@@ -273,7 +273,7 @@ def collect_target_ratio() -> Dict[str, float]:
             f"{grade}",
             min_value=0,
             max_value=100,
-            value=float(DEFAULT_TARGET.get(grade, 0)),
+            value=float(DEFAULT_TARGET.get(grade, 0.0)),
             step=1,
             key=f"target_{grade}",
         )
