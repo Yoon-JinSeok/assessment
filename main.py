@@ -257,7 +257,7 @@ def summarize_distribution(
         {
             "등급": GRADE_ORDER,
             "학생 수": counts.values,
-            "비율(%)": percentages.round(2).values,
+            "비율(%)": percentages.round(1).values,
             "목표 비율(%)": [target_ratio.get(grade, 0.0) for grade in GRADE_ORDER],
         }
     )
@@ -271,14 +271,14 @@ def collect_target_ratio() -> Dict[str, float]:
     for grade in GRADE_ORDER:
         ratio_inputs[grade] = st.sidebar.number_input(
             f"{grade}",
-            min_value=0.0,
-            max_value=100.0,
-            value=float(DEFAULT_TARGET.get(grade, 0.0)),
-            step=1.0,
+            min_value=0,
+            max_value=100,
+            value=float(DEFAULT_TARGET.get(grade, 0)),
+            step=1,
             key=f"target_{grade}",
         )
     total_ratio = sum(ratio_inputs.values())
-    if total_ratio != 100.0:
+    if total_ratio != 100:
         st.sidebar.warning(f"현재 입력된 목표 비율 합계는 {total_ratio:.1f}% 입니다. 100%가 되도록 조정하세요.")
     return ratio_inputs
 
