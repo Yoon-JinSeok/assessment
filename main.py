@@ -304,7 +304,7 @@ def collect_target_ratio() -> Dict[str, float]:
 def main() -> None:
     st.title("성취평가 등급컷 예측 프로그램")
     st.caption(
-        "기말고사 성적 분포를 가정(중간고사와 동일)하여 원하는 학기말 성취평가 비율을 시뮬레이션합니다. / created by 윤진석"
+        "기말고사 성적 분포를 가정(중간고사와 동일)하여 원하는 학기말 성취평가 비율을 시뮬레이션합니다. / Created by 윤진석"
     )
 
     with st.sidebar:
