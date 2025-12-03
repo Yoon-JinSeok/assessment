@@ -156,10 +156,20 @@ def parse_gradebook(
     return pd.DataFrame(records)
 
 
-def build_score_series(df: pd.DataFrame) -> pd.Series:
+def build_score_series(df: pd.DataFrame, reducer: str = "mean") -> pd.Series:
+    """평가 데이터프레임을 학생별 점수 시리즈로 변환."""
+
     if df is None or df.empty:
         return pd.Series(dtype="float64")
-    return df.groupby("student_key")["score"].mean()
+
+    grouped = df.groupby("student_key")["score"]
+    if reducer == "sum":
+        return grouped.sum()
+    if reducer == "min":
+        return grouped.min()
+    if reducer == "max":
+        return grouped.max()
+    return grouped.mean()
 
 
 def apply_weights(
@@ -361,8 +371,8 @@ def main() -> None:
     if midterm_df is None or midterm_df.empty:
         st.stop()
 
-    midterm_series = build_score_series(midterm_df)
-    performance_series = build_score_series(performance_df) if performance_df is not None else pd.Series(dtype="float64")
+    midterm_series = build_score_series(midterm_df, reducer="mean")
+    performance_series = build_score_series(performance_df, reducer="sum")
 
     all_students = sorted(set(midterm_series.index).union(performance_series.index))
     student_records = pd.DataFrame({"student_key": all_students})
