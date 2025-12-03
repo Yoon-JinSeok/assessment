@@ -20,7 +20,7 @@ except ImportError:  # pragma: no cover - 환경 의존
 GRADE_ORDER = ["A", "B", "C", "D", "E"]
 GRADE_CUT_KEYS = ["A", "B", "C", "D"]
 DEFAULT_CUTS = {"A": 90.0, "B": 80.0, "C": 70.0, "D": 60.0}
-DEFAULT_TARGET = {"A": 20.0, "B": 30.0, "C": 30.0, "D": 15.0, "E": 5.0}
+DEFAULT_TARGET = {"A": 32.0, "B": 40.0, "C": 20.0, "D": 5.0, "E": 3.0}
 
 
 st.set_page_config(
