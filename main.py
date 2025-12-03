@@ -20,7 +20,7 @@ except ImportError:  # pragma: no cover - 환경 의존
 GRADE_ORDER = ["A", "B", "C", "D", "E"]
 GRADE_CUT_KEYS = ["A", "B", "C", "D"]
 DEFAULT_CUTS = {"A": 90.0, "B": 80.0, "C": 70.0, "D": 60.0}
-DEFAULT_TARGET = {"A": 32, "B": 40, "C": 15, "D": 10, "E": 3}
+DEFAULT_TARGET = {"A": 20.0, "B": 30.0, "C": 30.0, "D": 15.0, "E": 5.0}
 
 
 st.set_page_config(
@@ -257,7 +257,7 @@ def summarize_distribution(
         {
             "등급": GRADE_ORDER,
             "학생 수": counts.values,
-            "비율(%)": percentages.round(1).values,
+            "비율(%)": percentages.round(2).values,
             "목표 비율(%)": [target_ratio.get(grade, 0.0) for grade in GRADE_ORDER],
         }
     )
@@ -271,14 +271,14 @@ def collect_target_ratio() -> Dict[str, float]:
     for grade in GRADE_ORDER:
         ratio_inputs[grade] = st.sidebar.number_input(
             f"{grade}",
-            min_value=0,
-            max_value=100,
+            min_value=0.0,
+            max_value=100.0,
             value=float(DEFAULT_TARGET.get(grade, 0.0)),
-            step=1,
+            step=1.0,
             key=f"target_{grade}",
         )
     total_ratio = sum(ratio_inputs.values())
-    if total_ratio != 100:
+    if total_ratio != 100.0:
         st.sidebar.warning(f"현재 입력된 목표 비율 합계는 {total_ratio:.1f}% 입니다. 100%가 되도록 조정하세요.")
     return ratio_inputs
 
@@ -300,13 +300,13 @@ def main() -> None:
         )
 
         st.subheader("만점 및 반영 비율")
-        midterm_max = st.number_input("중간고사 만점", min_value=1, value=100, step=1)
-        final_exam_max = st.number_input("기말고사 만점", min_value=1, value=100, step=1)
-        performance_max = st.number_input("수행평가 만점", min_value=1, value=40, step=1)
+        midterm_max = st.number_input("중간고사 만점", min_value=1.0, value=100.0, step=1.0)
+        final_exam_max = st.number_input("기말고사 만점", min_value=1.0, value=100.0, step=1.0)
+        performance_max = st.number_input("수행평가 만점", min_value=1.0, value=100.0, step=1.0)
 
-        midterm_weight = st.number_input("중간고사 반영비율(%)", min_value=0, max_value=100, value=30)
-        final_exam_weight = st.number_input("기말고사 반영비율(%)", min_value=0, max_value=100, value=30)
-        performance_weight = st.number_input("수행평가 반영비율(%)", min_value=0, max_value=100, value=40)
+        midterm_weight = st.number_input("중간고사 반영비율(%)", min_value=0.0, max_value=100.0, value=30.0)
+        final_exam_weight = st.number_input("기말고사 반영비율(%)", min_value=0.0, max_value=100.0, value=40.0)
+        performance_weight = st.number_input("수행평가 반영비율(%)", min_value=0.0, max_value=100.0, value=30.0)
 
         weight_total = midterm_weight + final_exam_weight + performance_weight
         if abs(weight_total - 100.0) > 1e-6:
