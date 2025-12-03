@@ -20,6 +20,7 @@ except ImportError:  # pragma: no cover - 환경 의존
 GRADE_ORDER = ["A", "B", "C", "D", "E"]
 GRADE_CUT_KEYS = ["A", "B", "C", "D"]
 DEFAULT_CUTS = {"A": 90.0, "B": 80.0, "C": 70.0, "D": 60.0}
+PERFORMANCE_DEFAULT_CUTS = {"A": 36.0, "B": 32.0, "C": 28.0, "D": 24.0, "E": 21.0}
 DEFAULT_TARGET = {"A": 32.0, "B": 40.0, "C": 20.0, "D": 5.0, "E": 3.0}
 
 
@@ -333,7 +334,9 @@ def main() -> None:
         midterm_cuts = render_grade_cut_inputs("중간", midterm_max, DEFAULT_CUTS, integer=True)
 
         st.subheader("수행평가 등급컷")
-        performance_cuts = render_grade_cut_inputs("수행", performance_max, DEFAULT_CUTS, integer=True)
+        performance_cuts = render_grade_cut_inputs(
+            "수행", performance_max, PERFORMANCE_DEFAULT_CUTS, integer=True
+        )
 
     target_ratio = collect_target_ratio()
 
