@@ -483,7 +483,7 @@ def main() -> None:
         alt.Chart(chart_df)
         .mark_bar()
         .encode(
-            x=alt.X("등급:N", title="등급"),
+            x=alt.X("등급:N", title="등급", axis=alt.Axis(labelAngle=0)),
             y=alt.Y("비율값:Q", title="비율(%)"),
             color=alt.Color("지표:N", title="구분"),
             xOffset="지표:N",
