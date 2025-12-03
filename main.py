@@ -545,10 +545,6 @@ def main() -> None:
         use_container_width=True,
     )
 
-    st.caption(
-        "※ 기말고사 성적은 중간고사와 동일하다고 가정했으며, 기말 등급컷 슬라이더 비율을 학기말 총점에도 동일하게 적용했습니다."
-    )
-
-
+    st.caption("※ 기말고사 성적은 중간고사와 동일하다고 가정했습니다.")
 if __name__ == "__main__":
     main()
