@@ -377,14 +377,18 @@ def main() -> None:
 
     st.dataframe(summary_df, use_container_width=True)
 
-    comparison = summary_df.set_index("등급")[["비율(%)", "목표 비율(%)"]]
-    chart_df = comparison.reset_index().melt(id_vars="등급", var_name="지표", value_name="비율(%)")
+    chart_df = summary_df.melt(
+        id_vars="등급",
+        value_vars=["비율(%)", "목표 비율(%)"],
+        var_name="지표",
+        value_name="비율값",
+    )
     bar_chart = (
         alt.Chart(chart_df)
         .mark_bar()
         .encode(
             x=alt.X("등급:N", title="등급"),
-            y=alt.Y("비율(%):Q", title="비율(%)"),
+            y=alt.Y("비율값:Q", title="비율(%)"),
             color=alt.Color("지표:N", title="구분"),
             xOffset="지표:N",
         )
