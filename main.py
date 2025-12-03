@@ -208,20 +208,37 @@ def assign_grade(score: float, cuts: Dict[str, float]) -> str:
     return "E"
 
 
-def render_grade_cut_inputs(section: str, max_score: float, defaults: Dict[str, float]) -> Dict[str, float]:
+def render_grade_cut_inputs(
+    section: str,
+    max_score: float,
+    defaults: Dict[str, float],
+    *,
+    integer: bool = False,
+) -> Dict[str, float]:
     cols = st.columns(len(GRADE_CUT_KEYS))
     cuts: Dict[str, float] = {}
     ceiling = max_score
     for idx, grade in enumerate(GRADE_CUT_KEYS):
         default_value = min(defaults.get(grade, ceiling), ceiling)
-        cuts[grade] = cols[idx].number_input(
-            f"{section} {grade}컷",
-            min_value=0.0,
-            max_value=float(ceiling),
-            value=float(default_value),
-            step=0.5,
-            key=f"{section}_{grade}_cut",
-        )
+        if integer:
+            default_value = int(round(default_value))
+            cuts[grade] = cols[idx].number_input(
+                f"{section} {grade}컷",
+                min_value=0,
+                max_value=int(ceiling),
+                value=default_value,
+                step=1,
+                key=f"{section}_{grade}_cut",
+            )
+        else:
+            cuts[grade] = cols[idx].number_input(
+                f"{section} {grade}컷",
+                min_value=0.0,
+                max_value=float(ceiling),
+                value=float(default_value),
+                step=0.5,
+                key=f"{section}_{grade}_cut",
+            )
         ceiling = cuts[grade]
     return cuts
 
@@ -271,10 +288,10 @@ def collect_target_ratio() -> Dict[str, float]:
     for grade in GRADE_ORDER:
         ratio_inputs[grade] = st.sidebar.number_input(
             f"{grade}",
-            min_value=0.0,
-            max_value=100.0,
-            value=float(DEFAULT_TARGET.get(grade, 0.0)),
-            step=1.0,
+            min_value=0,
+            max_value=100,
+            value=int(DEFAULT_TARGET.get(grade, 0.0)),
+            step=1,
             key=f"target_{grade}",
         )
     total_ratio = sum(ratio_inputs.values())
@@ -313,10 +330,10 @@ def main() -> None:
             st.warning(f"반영비율 합계가 {weight_total:.1f}% 입니다. 100%가 되도록 조정하세요.")
 
         st.subheader("중간고사 등급컷")
-        midterm_cuts = render_grade_cut_inputs("중간", midterm_max, DEFAULT_CUTS)
+        midterm_cuts = render_grade_cut_inputs("중간", midterm_max, DEFAULT_CUTS, integer=True)
 
         st.subheader("수행평가 등급컷")
-        performance_cuts = render_grade_cut_inputs("수행", performance_max, DEFAULT_CUTS)
+        performance_cuts = render_grade_cut_inputs("수행", performance_max, DEFAULT_CUTS, integer=True)
 
     target_ratio = collect_target_ratio()
 
