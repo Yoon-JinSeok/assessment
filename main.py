@@ -68,7 +68,13 @@ def make_student_key(class_label, student_no) -> str:
 
 
 @st.cache_data(show_spinner=False)
-def parse_gradebook(file_bytes: bytes, source_name: str) -> pd.DataFrame:
+def parse_gradebook(
+    file_bytes: bytes,
+    source_name: str,
+    *,
+    data_start_row_idx: int = 5,
+    class_row_idx: int = 4,
+) -> pd.DataFrame:
     """지정된 양식의 엑셀 파일을 DataFrame으로 변환."""
 
     if not OPENPYXL_AVAILABLE:
@@ -80,7 +86,7 @@ def parse_gradebook(file_bytes: bytes, source_name: str) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame(columns=["student_key", "score", "source"])
 
-    start_row = 5  # 엑셀 기준 6행
+    start_row = data_start_row_idx
     end_row = df.shape[0]
     for idx in range(start_row, df.shape[0]):
         marker = df.iloc[idx, 0]
@@ -89,7 +95,7 @@ def parse_gradebook(file_bytes: bytes, source_name: str) -> pd.DataFrame:
             break
 
     student_numbers = df.iloc[start_row:end_row, 0].tolist()
-    class_labels = df.iloc[4, 1:].tolist() if df.shape[0] > 4 else []
+    class_labels = df.iloc[class_row_idx, 1:].tolist() if df.shape[0] > class_row_idx else []
 
     records: List[Dict[str, object]] = []
     for col_offset, class_label in enumerate(class_labels, start=1):
@@ -296,7 +302,12 @@ def main() -> None:
         for idx, file in enumerate(performance_files, start=1):
             perf_bytes = file.read()
             try:
-                parsed = parse_gradebook(perf_bytes, f"수행평가 {idx}")
+                parsed = parse_gradebook(
+                    perf_bytes,
+                    f"수행평가 {idx}",
+                    data_start_row_idx=6,  # 엑셀 7행부터 학생 점수
+                    class_row_idx=5,  # 엑셀 6행 반 정보
+                )
             except ImportError as exc:
                 st.error(str(exc))
                 st.stop()
