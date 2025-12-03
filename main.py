@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 from typing import Dict, List, Tuple
 
+import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -376,9 +377,20 @@ def main() -> None:
 
     st.dataframe(summary_df, use_container_width=True)
 
-    chart_source = summary_df.set_index("등급")["비율(%)"]
     comparison = summary_df.set_index("등급")[["비율(%)", "목표 비율(%)"]]
-    st.bar_chart(comparison)
+    chart_df = comparison.reset_index().melt(id_vars="등급", var_name="지표", value_name="비율(%)")
+    bar_chart = (
+        alt.Chart(chart_df)
+        .mark_bar()
+        .encode(
+            x=alt.X("등급:N", title="등급"),
+            y=alt.Y("비율(%)", type="quantitative", title="비율(%)"),
+            color=alt.Color("지표:N", title="구분"),
+            xOffset="지표:N",
+        )
+        .properties(height=320)
+    )
+    st.altair_chart(bar_chart, use_container_width=True)
 
     st.subheader("학생별 가중 총점 미리보기")
     st.dataframe(
