@@ -300,13 +300,13 @@ def main() -> None:
         )
 
         st.subheader("만점 및 반영 비율")
-        midterm_max = st.number_input("중간고사 만점", min_value=1.0, value=100.0, step=1.0)
-        final_exam_max = st.number_input("기말고사 만점", min_value=1.0, value=100.0, step=1.0)
-        performance_max = st.number_input("수행평가 만점", min_value=1.0, value=100.0, step=1.0)
+        midterm_max = st.number_input("중간고사 만점", min_value=1, value=100, step=1)
+        final_exam_max = st.number_input("기말고사 만점", min_value=1, value=100, step=1)
+        performance_max = st.number_input("수행평가 만점", min_value=1, value=100, step=1)
 
-        midterm_weight = st.number_input("중간고사 반영비율(%)", min_value=0.0, max_value=100.0, value=30.0)
-        final_exam_weight = st.number_input("기말고사 반영비율(%)", min_value=0.0, max_value=100.0, value=40.0)
-        performance_weight = st.number_input("수행평가 반영비율(%)", min_value=0.0, max_value=100.0, value=30.0)
+        midterm_weight = st.number_input("중간고사 반영비율(%)", min_value=0, max_value=100, value=30, step=1)
+        final_exam_weight = st.number_input("기말고사 반영비율(%)", min_value=0, max_value=100, value=30, step=1)
+        performance_weight = st.number_input("수행평가 반영비율(%)", min_value=0, max_value=100, value=40, step=1)
 
         weight_total = midterm_weight + final_exam_weight + performance_weight
         if abs(weight_total - 100.0) > 1e-6:
