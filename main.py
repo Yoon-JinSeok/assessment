@@ -200,6 +200,36 @@ def apply_weights(
     return student_scores
 
 
+def combine_total_grade_cuts(
+    midterm_cuts: Dict[str, float],
+    performance_cuts: Dict[str, float],
+    final_exam_cuts: Dict[str, float],
+    maxima: Dict[str, float],
+    weights: Dict[str, float],
+) -> Dict[str, float]:
+    """각 등급에 대한 학기말 총점 등급컷을 계산."""
+
+    total_cuts: Dict[str, float] = {}
+    for grade in GRADE_CUT_KEYS:
+        total_score = 0.0
+        midterm_max = maxima.get("midterm", 0.0)
+        performance_max = maxima.get("performance", 0.0)
+        final_max = maxima.get("final_exam", 0.0)
+
+        if midterm_max > 0:
+            total_score += (midterm_cuts.get(grade, 0.0) / midterm_max) * weights.get("midterm", 0.0)
+        if performance_max > 0:
+            total_score += (performance_cuts.get(grade, 0.0) / performance_max) * weights.get(
+                "performance", 0.0
+            )
+        if final_max > 0:
+            total_score += (final_exam_cuts.get(grade, 0.0) / final_max) * weights.get(
+                "final_exam", 0.0
+            )
+        total_cuts[grade] = total_score
+    return total_cuts
+
+
 def assign_grade(score: float, cuts: Dict[str, float]) -> str:
     if score is None or np.isnan(score):
         return "미도달"
@@ -422,18 +452,21 @@ def main() -> None:
     student_records["class_label"] = student_records["student_key"].map(class_map)
     student_records["student_no"] = student_records["student_key"].map(number_map)
 
+    component_maxima = {
+        "midterm": midterm_max,
+        "performance": performance_max,
+        "final_exam": final_exam_max,
+    }
+    component_weights = {
+        "midterm": midterm_weight,
+        "performance": performance_weight,
+        "final_exam": final_exam_weight,
+    }
+
     student_records = apply_weights(
         student_records,
-        {
-            "midterm": midterm_max,
-            "performance": performance_max,
-            "final_exam": final_exam_max,
-        },
-        {
-            "midterm": midterm_weight,
-            "performance": performance_weight,
-            "final_exam": final_exam_weight,
-        },
+        component_maxima,
+        component_weights,
     )
 
     student_records["student_display"] = [
@@ -454,13 +487,13 @@ def main() -> None:
         st.error("기말고사 만점은 0보다 커야 합니다.")
         st.stop()
 
-    total_weight_max = midterm_weight + performance_weight + final_exam_weight
-    exam_cut_percentages = {
-        grade: (final_exam_cuts.get(grade, 0.0) / final_exam_max) for grade in GRADE_CUT_KEYS
-    }
-    final_total_cuts = {
-        grade: exam_cut_percentages[grade] * total_weight_max for grade in GRADE_CUT_KEYS
-    }
+    final_total_cuts = combine_total_grade_cuts(
+        midterm_cuts,
+        performance_cuts,
+        final_exam_cuts,
+        component_maxima,
+        component_weights,
+    )
 
     summary_df, counts = summarize_distribution(student_records["total"], final_total_cuts, target_ratio)
 
