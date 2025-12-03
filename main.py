@@ -9,6 +9,13 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+try:
+    import openpyxl  # type: ignore # noqa: F401
+
+    OPENPYXL_AVAILABLE = True
+except ImportError:  # pragma: no cover - 환경 의존
+    OPENPYXL_AVAILABLE = False
+
 GRADE_ORDER = ["A", "B", "C", "D", "E"]
 GRADE_CUT_KEYS = ["A", "B", "C", "D"]
 DEFAULT_CUTS = {"A": 90.0, "B": 80.0, "C": 70.0, "D": 60.0}
@@ -64,7 +71,12 @@ def make_student_key(class_label, student_no) -> str:
 def parse_gradebook(file_bytes: bytes, source_name: str) -> pd.DataFrame:
     """지정된 양식의 엑셀 파일을 DataFrame으로 변환."""
 
-    df = pd.read_excel(io.BytesIO(file_bytes), header=None)
+    if not OPENPYXL_AVAILABLE:
+        raise ImportError(
+            "openpyxl 라이브러리가 필요합니다. requirements.txt에 openpyxl을 추가하고 설치해 주세요."
+        )
+
+    df = pd.read_excel(io.BytesIO(file_bytes), header=None, engine="openpyxl")
     if df.empty:
         return pd.DataFrame(columns=["student_key", "score", "source"])
 
@@ -262,7 +274,11 @@ def main() -> None:
     midterm_df = None
     if midterm_file is not None:
         midterm_bytes = midterm_file.read()
-        midterm_df = parse_gradebook(midterm_bytes, "중간고사")
+        try:
+            midterm_df = parse_gradebook(midterm_bytes, "중간고사")
+        except ImportError as exc:
+            st.error(str(exc))
+            st.stop()
         st.success(f"중간고사 데이터 {midterm_df['student_key'].nunique()}명 로드 완료")
     else:
         st.info("중간고사 성적 파일을 업로드해 주세요.")
@@ -279,7 +295,11 @@ def main() -> None:
         perf_frames = []
         for idx, file in enumerate(performance_files, start=1):
             perf_bytes = file.read()
-            parsed = parse_gradebook(perf_bytes, f"수행평가 {idx}")
+            try:
+                parsed = parse_gradebook(perf_bytes, f"수행평가 {idx}")
+            except ImportError as exc:
+                st.error(str(exc))
+                st.stop()
             parsed["assessment"] = idx
             perf_frames.append(parsed)
             st.info(f"수행평가 {idx}: {parsed['student_key'].nunique()}명")
