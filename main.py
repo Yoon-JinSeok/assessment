@@ -320,7 +320,7 @@ def main() -> None:
         st.subheader("만점 및 반영 비율")
         midterm_max = st.number_input("중간고사 만점", min_value=1, value=100, step=1)
         final_exam_max = st.number_input("기말고사 만점", min_value=1, value=100, step=1)
-        performance_max = st.number_input("수행평가 만점", min_value=1, value=100, step=1)
+        performance_max = st.number_input("수행평가 만점", min_value=1, value=40, step=1)
 
         midterm_weight = st.number_input("중간고사 반영비율(%)", min_value=0, max_value=100, value=30, step=1)
         final_exam_weight = st.number_input("기말고사 반영비율(%)", min_value=0, max_value=100, value=30, step=1)
