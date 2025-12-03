@@ -284,7 +284,7 @@ def render_grade_cut_sliders(
         default_value = min(defaults.get(grade, ceiling), ceiling)
         cuts[grade] = cols[idx].slider(
             f"{label} {grade}컷",
-            min_value=0.0,
+            min_value=0.5,
             max_value=float(ceiling),
             value=float(default_value),
             step=0.5,
